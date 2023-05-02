@@ -62,7 +62,6 @@ public class mjsi {
             //          lex.type != UNEXPECTED_EOF);
 
             // O código a seguir é dado para testar o interpretador.
-            // F
             SyntaticAnalysis s = new SyntaticAnalysis(l);
             Command cmd = s.process();
             Interpreter.interpret(cmd);

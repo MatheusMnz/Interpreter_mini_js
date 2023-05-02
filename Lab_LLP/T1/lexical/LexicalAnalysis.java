@@ -98,13 +98,18 @@ public class LexicalAnalysis implements AutoCloseable {
                         state = 1;
                         line++;
                     } else if (c == '.' || c == ',' || c == ':' ||
-                               c == ';' || c == '?' || c == '*' ||
-                               c == '(' || c == ')' || c == '{' ||
-                               c == '}' || c == '[' || c == ']') 
-                    {
+                            c == ';' || c == '?' || c == '*' ||
+                            c == '(' || c == ')' || c == '{' ||
+                            c == '}' || c == '[' || c == ']') {
                         state = 13;
                         token.lexeme += (char) c;
-                    } else if (c == '+') {
+                    } 
+                    else if(c == '=' || c == '!' || c == '<' || c == '>')
+                    {
+                        state = 4;
+                        token.lexeme += (char) c;
+                    }
+                    else if (c == '+') {
                         state = 5;
                         token.lexeme += (char) c;
                     } else if (c == '-') {

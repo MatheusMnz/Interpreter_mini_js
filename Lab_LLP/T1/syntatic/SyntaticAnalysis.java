@@ -1,52 +1,10 @@
 package syntatic;
 
-import static lexical.Token.Type.ADD;
-import static lexical.Token.Type.AND;
-import static lexical.Token.Type.ASSIGN;
-import static lexical.Token.Type.TERNARY;
-import static lexical.Token.Type.CLOSE_BRA;
-import static lexical.Token.Type.CLOSE_CUR;
-import static lexical.Token.Type.CLOSE_PAR;
-import static lexical.Token.Type.COLON;
-import static lexical.Token.Type.COMMA;
-import static lexical.Token.Type.CONST;
-import static lexical.Token.Type.DEBUG;
-import static lexical.Token.Type.DEC;
-import static lexical.Token.Type.DIV;
-import static lexical.Token.Type.ELSE;
-import static lexical.Token.Type.END_OF_FILE;
-import static lexical.Token.Type.FALSE;
-import static lexical.Token.Type.FOR;
-import static lexical.Token.Type.FUNCTION;
-import static lexical.Token.Type.IF;
-import static lexical.Token.Type.IN;
-import static lexical.Token.Type.INC;
-import static lexical.Token.Type.LET;
-import static lexical.Token.Type.MUL;
-import static lexical.Token.Type.NAME;
-import static lexical.Token.Type.NOT;
-import static lexical.Token.Type.NUMBER;
-import static lexical.Token.Type.OPEN_BRA;
-import static lexical.Token.Type.OPEN_CUR;
-import static lexical.Token.Type.OPEN_PAR;
-import static lexical.Token.Type.OR;
-import static lexical.Token.Type.RETURN;
-import static lexical.Token.Type.SEMICOLON;
-import static lexical.Token.Type.SUB;
-import static lexical.Token.Type.TEXT;
-import static lexical.Token.Type.TRUE;
-import static lexical.Token.Type.UNDEFINED;
-import static lexical.Token.Type.WHILE;
-import static lexical.Token.Type.LOWER_THAN;
-import static lexical.Token.Type.GREATER_THAN;
-import static lexical.Token.Type.LOWER_EQUAL;
-import static lexical.Token.Type.GREATER_EQUAL;
-import static lexical.Token.Type.EQUALS;
-import static lexical.Token.Type.NOT_EQUALS;
-import static lexical.Token.Type.DOT;
+import static lexical.Token.Type.*;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import interpreter.Environment;
 import interpreter.Interpreter;
 import interpreter.InterpreterException;
@@ -82,6 +40,7 @@ public class SyntaticAnalysis {
 
     public Command process() {
         Command cmd = procCode();
+        //Expr expr = procExpr();
         eat(END_OF_FILE);
 
         return cmd;
@@ -138,20 +97,27 @@ public class SyntaticAnalysis {
         throw new SyntaticException(current.line, reason);
     }
 
-    // <code> ::= { <cmd> }
-    private BlocksCommand procCode() {
-        List<Command> cmds = new ArrayList<Command>();
-        int line = current.line;
-        while (check(OPEN_CUR, CONST, LET, DEBUG,
-                IF, WHILE, FOR, NOT, ADD, SUB,
-                INC, DEC, OPEN_PAR, UNDEFINED,
-                FALSE, TRUE, NUMBER, TEXT,
-                OPEN_BRA, OPEN_CUR, FUNCTION, NAME)) {
-            Command cmd = procCmd();
-            cmds.add(cmd);
-        }
+  // <code> ::= { <cmd> }
+  private BlocksCommand procCode() {
+    List<Command> cmds = new ArrayList<Command>();
+    int line = current.line;
+    while (check(OPEN_CUR, CONST, LET, DEBUG,
+            IF, WHILE, FOR, NOT, ADD, SUB,
+            INC, DEC, OPEN_PAR, UNDEFINED,
+            FALSE, TRUE, NUMBER, TEXT,
+            OPEN_BRA, OPEN_CUR, FUNCTION, NAME)) {
+        Command cmd = procCmd();
+        cmds.add(cmd);
+    }
 
-        return new BlocksCommand(line, cmds);
+    return new BlocksCommand(line, cmds);
+}
+
+    // <block> ::= '{' <code> '}'
+    private void procBlock() {
+        eat(OPEN_CUR);
+        procCode();
+        eat(CLOSE_CUR);
     }
 
     // <cmd> ::= <block> | <decl> | <debug> | <if> | <while> | <for> | <assign>
@@ -176,49 +142,41 @@ public class SyntaticAnalysis {
         return cmd;
     }
 
-    // <block> ::= '{' <code> '}'
-    private void procBlock() {
-        eat(OPEN_CUR);
-        procCode();
-        eat(CLOSE_CUR);
-    }
+ 
 
-    // <decl> ::= ( const | let ) <name> [ '=' <expr> ] { ',' <name> [ '=' <expr> ]
-    // } ';'
-    private BlocksCommand procDecl() {
-        boolean constant = false;
-        if (match(CONST, LET)) {
-            constant = (previous.type == CONST);
-        } else {
-            reportError();
-        }
-        int line = previous.line;
-
-        Token name = procName();
-        Variable var = this.environment.declare(name, constant);
-
-        Expr expr = match(ASSIGN) ? procExpr() : new ConstExpr(name.line, null);
-
-        InitializeCommand icmd = new InitializeCommand(name.line, var, expr);
-
-        List<Command> cmds = new ArrayList<Command>();
-        cmds.add(icmd);
-
-        while (match(COMMA)) {
-            name = procName();
-            var = this.environment.declare(name, constant);
-
-            expr = match(ASSIGN) ? procExpr() : new ConstExpr(name.line, null);
-
-            icmd = new InitializeCommand(name.line, var, expr);
+        // <decl> ::= ( const | let ) <name> [ '=' <expr> ] { ',' <name> [ '=' <expr> ] } ';'
+        private BlocksCommand procDecl() {
+            boolean constant = false;
+            if (match(CONST, LET)) {
+                constant = (previous.type == CONST);
+            } else {
+                reportError();
+            }
+            int line = previous.line;
+    
+            Token name = procName();
+            Variable var = this.environment.declare(name, constant);
+    
+            Expr expr = match(ASSIGN) ? procExpr() : new ConstExpr(name.line, null);
+            InitializeCommand icmd = new InitializeCommand(name.line, var, expr);
+    
+            List<Command> cmds = new ArrayList<Command>();
             cmds.add(icmd);
+    
+            while (match(COMMA)) {
+                name = procName();
+                var = this.environment.declare(name, constant);
+    
+                expr = match(ASSIGN) ? procExpr() : new ConstExpr(name.line, null);
+                icmd = new InitializeCommand(name.line, var, expr);
+                cmds.add(icmd);
+            }
+    
+            eat(SEMICOLON);
+    
+            BlocksCommand bcmds = new BlocksCommand(line, cmds);
+            return bcmds;
         }
-
-        eat(SEMICOLON);
-
-        BlocksCommand bcmds = new BlocksCommand(line, cmds);
-        return bcmds;
-    }
 
     // <debug> ::= debug <expr> ';'
     private DebugCommand procDebug() {
@@ -243,8 +201,9 @@ public class SyntaticAnalysis {
         }
     }
 
-    // <while> ::= while '(' <expr> ')' <cmd>
-    private void procWhile() {
+  
+     // <while> ::= while '(' <expr> ')' <cmd>
+     private void procWhile() {
         eat(WHILE);
         eat(OPEN_PAR);
         procExpr();
@@ -291,37 +250,23 @@ public class SyntaticAnalysis {
         Expr expr = procCond();
         if (match(TERNARY)) {
             procExpr();
-            if(match(COLON)){
-                procExpr();
-            }
+            eat(COLON);
+            procExpr();
         }
         return expr;
     }
 
     // <cond> ::= <rel> { ( '&&' | '||' ) <rel> }
     private Expr procCond() {
-        Expr left = procRel();
+        Expr expr = procRel();
         while (match(AND, OR)) {
-            BinaryExpr.Op op;
-            switch (previous.type) {
-                case AND:
-                    op = BinaryExpr.Op.And;
-                    break;
-                case OR:
-                default:
-                    op = BinaryExpr.Op.Or;
-                    break;
-            }
-
-            int line = previous.line;
-
-            Expr right = procRel();
-
-            left = new BinaryExpr(line, left, op, right);
+            // TODO: Me implementar.
+            procRel();
         }
 
-        return left;
+        return expr;
     }
+
 
     // <rel> ::= <arith> [ ( '<' | '>' | '<=' | '>=' | '==' | '!=' ) <arith> ]
     private Expr procRel() {
