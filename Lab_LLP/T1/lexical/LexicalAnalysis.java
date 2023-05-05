@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import interpreter.value.NumberValue;
+import interpreter.value.TextValue;
 
 public class LexicalAnalysis implements AutoCloseable {
 
@@ -91,22 +92,25 @@ public class LexicalAnalysis implements AutoCloseable {
 
             switch (state) {
                 case 1:
-                    if (c == ' ' || c == '\t' ||
-                            c == '\r') {
+                    if (c == ' ' || c == '\t' || c == '\r') {
                         state = 1;
                     } else if (c == '\n') {
                         state = 1;
                         line++;
                     } else if (c == '.' || c == ',' || c == ':' ||
-                            c == ';' || c == '?' || c == '*' ||
-                            c == '(' || c == ')' || c == '{' ||
-                            c == '}' || c == '[' || c == ']') {
+                               c == ';' || c == '?' || c == '*' ||
+                               c == '(' || c == ')' || c == '{' ||
+                               c == '}' || c == '[' || c == ']') {
                         state = 13;
                         token.lexeme += (char) c;
                     } 
                     else if(c == '=' || c == '!' || c == '<' || c == '>')
                     {
                         state = 4;
+                        token.lexeme += (char) c;
+                    }
+                    else if(c == '"'){
+                        state = 12;
                         token.lexeme += (char) c;
                     }
                     else if (c == '+') {
@@ -121,8 +125,7 @@ public class LexicalAnalysis implements AutoCloseable {
                     } else if (c == '|') {
                         state = 8;
                         token.lexeme += (char) c;
-                    } else if (c == '_' || c == '$' ||
-                            Character.isLetter(c)) {
+                    } else if (c == '_' || c == '$' || Character.isLetter(c)) {
                         state = 9;
                         token.lexeme += (char) c;
                     } else if (Character.isDigit(c)) {
@@ -136,7 +139,6 @@ public class LexicalAnalysis implements AutoCloseable {
                         token.lexeme += (char) c;
                         token.type = Token.Type.INVALID_TOKEN;
                     }
-
                     break;
                 case 2:
                     if (c == '/') {
@@ -173,7 +175,6 @@ public class LexicalAnalysis implements AutoCloseable {
                         state = 13;
                         ungetc(c);
                     }
-
                     break;
                 case 6:
                     if (c == '-') {
@@ -183,7 +184,6 @@ public class LexicalAnalysis implements AutoCloseable {
                         state = 13;
                         ungetc(c);
                     }
-
                     break;
                 case 7:
                     if (c == '&') {
@@ -193,7 +193,6 @@ public class LexicalAnalysis implements AutoCloseable {
                         state = 14;
                         token.type = Token.Type.INVALID_TOKEN;
                     }
-
                     break;
                 case 8:
                     if (c == '|') {
@@ -203,19 +202,15 @@ public class LexicalAnalysis implements AutoCloseable {
                         state = 14;
                         token.type = Token.Type.INVALID_TOKEN;
                     }
-
                     break;
                 case 9:
-                    if (c == '_' || c == '$' ||
-                            Character.isLetter(c) ||
-                            Character.isDigit(c)) {
+                    if (c == '_' || c == '$' || Character.isLetter(c) || Character.isDigit(c)) {
                         state = 9;
                         token.lexeme += (char) c;
                     } else {
                         state = 13;
                         ungetc(c);
                     }
-
                     break;
                 case 10:
                     if (Character.isDigit(c)) {
@@ -230,7 +225,6 @@ public class LexicalAnalysis implements AutoCloseable {
                         token.type = Token.Type.NUMBER;
                         token.literal = new NumberValue(toNumber(token.lexeme));
                     }
-
                     break;
                 case 11:
                     if (Character.isDigit(c)) {
@@ -244,14 +238,24 @@ public class LexicalAnalysis implements AutoCloseable {
                     }
                     break;
                 case 12:
-                    if (c == '"') {
-                        state = 14;
-                        token.lexeme += (char) c;
-                    } else {
+                    if( c != '"'){
                         state = 12;
                         token.lexeme += (char) c;
                     }
-                    break;
+                    else if (c == '"') {
+                        state = 14;
+                        token.type = Token.Type.TEXT;
+                        token.literal = new TextValue(token.lexeme);
+                    }
+                    else if (c == -1) {
+                        state = 14;
+                        token.type = Token.Type.UNEXPECTED_EOF;
+                    } 
+                    else if (c == '\n') {
+                        state = 12;
+                        line++;  
+                    }
+                        break;
                 default:
                     throw new RuntimeException("Unreachable");
             }
@@ -261,7 +265,6 @@ public class LexicalAnalysis implements AutoCloseable {
             token.type = keywords.containsKey(token.lexeme) ? keywords.get(token.lexeme) : Token.Type.NAME;
 
         token.line = this.line;
-
         return token;
     }
 

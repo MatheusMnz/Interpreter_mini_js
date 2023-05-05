@@ -39,7 +39,6 @@ public class mjsi {
                 System.out.println();
                 break;
             }
-
             run(new ByteArrayInputStream(line.getBytes()));
         }
     }

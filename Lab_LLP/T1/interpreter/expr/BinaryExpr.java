@@ -1,12 +1,18 @@
 package interpreter.expr;
 
 
+import interpreter.InterpreterException;
 import interpreter.value.BoolValue;
+import interpreter.value.FunctionValue;
+import interpreter.value.ListValue;
 import interpreter.value.NumberValue;
+import interpreter.value.ObjectValue;
+import interpreter.value.TextValue;
 import interpreter.value.Value;
 
 
 public class BinaryExpr extends Expr{
+    
     public static enum Op {
         And,
         Or,
@@ -78,7 +84,6 @@ public class BinaryExpr extends Expr{
                 res = divOp(v1, v2);
                 break;
         }
-
         return res;
     }
 
@@ -95,38 +100,62 @@ public class BinaryExpr extends Expr{
     }
 
     private Value<?> equalOp(Value<?> v1, Value<?> v2) {
-        Double d1 = NumberValue.convert(v1);
-        Double d2 = NumberValue.convert(v1);
-        return new BoolValue(d1 == d2);
+        if (v1 instanceof NumberValue && v2 instanceof NumberValue) {
+            return new BoolValue(v1.equals(v2));
+        } else if (v1 instanceof TextValue && v2 instanceof TextValue) {
+            return new BoolValue(v1.equals(v2));
+        } else if (v1 instanceof BoolValue && v2 instanceof BoolValue) {
+            return new BoolValue(v1.equals(v2));
+        } else if (v1 instanceof FunctionValue && v2 instanceof FunctionValue) {
+            return new BoolValue(v1.equals(v2));
+        } else if (v1 instanceof ListValue && v2 instanceof ListValue) {
+            return new BoolValue(v1.equals(v2));
+        } else if (v1 instanceof ObjectValue && v2 instanceof ObjectValue) {
+            return new BoolValue(v1.equals(v2));
+        } else {
+            throw new InterpreterException(super.getLine());
+        }
     }
 
     private Value<?> notEqualOp(Value<?> v1, Value<?> v2) {
-        Double d1 = NumberValue.convert(v1);
-        Double d2 = NumberValue.convert(v1);
-        return new BoolValue(d1 != d2);
+        if (v1 instanceof NumberValue && v2 instanceof NumberValue) {
+            return new BoolValue(!(v1.equals(v2)));
+        } else if (v1 instanceof TextValue && v2 instanceof TextValue) {
+            return new BoolValue(!(v1.equals(v2)));
+        } else if (v1 instanceof BoolValue && v2 instanceof BoolValue) {
+            return new BoolValue(!(v1.equals(v2)));
+        } else if (v1 instanceof FunctionValue && v2 instanceof FunctionValue) {
+            return new BoolValue(!(v1.equals(v2)));
+        } else if (v1 instanceof ListValue && v2 instanceof ListValue) {
+            return new BoolValue(!(v1.equals(v2)));
+        } else if (v1 instanceof ObjectValue && v2 instanceof ObjectValue) {
+            return new BoolValue(!(v1.equals(v2)));
+        } else {
+            throw new InterpreterException(super.getLine());
+        }
     }
 
     private Value<?> lowerThanOp(Value<?> v1, Value<?> v2) {
-        Double d1 = NumberValue.convert(v1);
-        Double d2 = NumberValue.convert(v1);
+        double d1 = NumberValue.convert(v1);
+        double d2 = NumberValue.convert(v2);
         return new BoolValue(d1 < d2);
     }
 
     private Value<?> lowerEqualOp(Value<?> v1, Value<?> v2) {
-        Double d1 = NumberValue.convert(v1);
-        Double d2 = NumberValue.convert(v1);
+        double d1 = NumberValue.convert(v1);
+        double d2 = NumberValue.convert(v2);
         return new BoolValue(d1 <= d2);
     }
 
     private Value<?> greaterThanOp(Value<?> v1, Value<?> v2) {
-        Double d1 = NumberValue.convert(v1);
-        Double d2 = NumberValue.convert(v1);
+        double d1 = NumberValue.convert(v1);
+        double d2 = NumberValue.convert(v2);
         return new BoolValue(d1 > d2);
     }
 
     private Value<?> greaterEqualOp(Value<?> v1, Value<?> v2) {
-        Double d1 = NumberValue.convert(v1);
-        Double d2 = NumberValue.convert(v1);
+        double d1 = NumberValue.convert(v1);
+        double d2 = NumberValue.convert(v2);
         return new BoolValue(d1 >= d2);
     }
 
@@ -153,4 +182,5 @@ public class BinaryExpr extends Expr{
         double d2 = NumberValue.convert(v2);
         return new NumberValue(d1 / d2);
     }
+
 }

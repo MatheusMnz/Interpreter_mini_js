@@ -1,5 +1,6 @@
 package interpreter.expr;
 
+import interpreter.InterpreterException;
 import interpreter.value.BoolValue;
 import interpreter.value.NumberValue;
 import interpreter.value.Value;
@@ -61,23 +62,65 @@ public class UnaryExpr extends Expr {
         return new NumberValue(-n);
     }
 
-    private Value<?> preIncOp(Value<?> v) {
-        double n = NumberValue.convert(v);
-        return new NumberValue(++n);
+    private Value<?> preIncOp(Value<?> v){
+        
+       v = expr.expr();
+       double d = NumberValue.convert(v);
+       double d1 = d + 1;
+       Value<?> v2 = new NumberValue(d1);
+
+       if(expr instanceof SetExpr){
+        SetExpr se = (SetExpr) expr;
+        se.setValue(v2);
+        return v2;
+       } 
+       throw new InterpreterException(super.getLine());
     }
 
     private Value<?> posIncOp(Value<?> v) {
-        double n = NumberValue.convert(v);
-        return new NumberValue(n++);
+        v = expr.expr();
+        double d = NumberValue.convert(v);
+        double d1 = d + 1;
+        Value<?> v1 = new NumberValue(d);
+        Value<?> v2 = new NumberValue(d1);
+
+
+        if (expr instanceof SetExpr) {
+            SetExpr aux = (SetExpr) expr;
+            aux.setValue(v2);
+            return v1;
+        }
+        throw new InterpreterException(super.getLine());
     }
 
     private Value<?> preDecOp(Value<?> v) {
-        double n = NumberValue.convert(v);
-        return new NumberValue(--n);
+                
+       v = expr.expr();
+       double d = NumberValue.convert(v);
+       double d1 = d - 1;
+       Value<?> v2 = new NumberValue(d1);
+
+       if(expr instanceof SetExpr){
+        SetExpr se = (SetExpr) expr;
+        se.setValue(v2);
+        return v2;
+       } 
+       throw new InterpreterException(super.getLine());
     }
 
     private Value<?> posDecOp(Value<?> v) {
-        double n = NumberValue.convert(v);
-        return new NumberValue(n--);
+        v = expr.expr();
+        double d = NumberValue.convert(v);
+        double d1 = d - 1;
+        Value<?> v1 = new NumberValue(d);
+        Value<?> v2 = new NumberValue(d1);
+
+
+        if (expr instanceof SetExpr) {
+            SetExpr aux = (SetExpr) expr;
+            aux.setValue(v2);
+            return v1;
+        }
+        throw new InterpreterException(super.getLine());
     }
 }
