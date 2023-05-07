@@ -17,6 +17,7 @@ import interpreter.command.DebugCommand;
 import interpreter.command.IfCommand;
 import interpreter.command.InitializeCommand;
 import interpreter.command.WhileCommand;
+import interpreter.expr.AccessExpr;
 import interpreter.expr.BinaryExpr;
 import interpreter.expr.ConstExpr;
 import interpreter.expr.Expr;
@@ -628,15 +629,26 @@ public class SyntaticAnalysis {
     // <lvalue> ::= <name> { '.' <name> | '[' <expr> ']' }
     private SetExpr procLValue() {
         Token name = procName();
+        int line = previous.line;
         Variable var = this.environment.get(name);
 
         while (check(DOT, OPEN_BRA)) {
             if (match(DOT)) {
-                procName();
+                name = procName();
+                TextValue nome = new TextValue (name.lexeme);
+                ConstExpr ce = new ConstExpr(line, nome);
+                AccessExpr acces = new AccessExpr(line,var,ce);
+                Variable variable = new Variable(name);
+                variable.setValue(acces.expr());
+                return variable;
             } else {
                 eat(OPEN_BRA);
-                procExpr();
+                Expr expr = procExpr();
                 eat(CLOSE_BRA);
+                AccessExpr acces = new AccessExpr(line,var,expr);
+                Variable variable = new Variable(name);
+                variable.setValue(acces.expr());
+                return variable;
             }
         }
         return var;
