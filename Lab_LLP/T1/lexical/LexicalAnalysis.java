@@ -111,7 +111,6 @@ public class LexicalAnalysis implements AutoCloseable {
                     }
                     else if(c == '"'){
                         state = 12;
-                        token.lexeme += (char) c;
                     }
                     else if (c == '+') {
                         state = 5;
@@ -250,7 +249,7 @@ public class LexicalAnalysis implements AutoCloseable {
                     else if (c == -1) {
                         state = 14;
                         token.type = Token.Type.UNEXPECTED_EOF;
-                    } 
+                    }
                     else if (c == '\n') {
                         state = 12;
                         line++;  
@@ -261,8 +260,9 @@ public class LexicalAnalysis implements AutoCloseable {
             }
         }
 
-        if (state == 13)
+        if (state == 13){
             token.type = keywords.containsKey(token.lexeme) ? keywords.get(token.lexeme) : Token.Type.NAME;
+        }
 
         token.line = this.line;
         return token;

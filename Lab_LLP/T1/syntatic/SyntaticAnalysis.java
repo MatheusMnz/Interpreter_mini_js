@@ -5,6 +5,8 @@ import static lexical.Token.Type.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.w3c.dom.Text;
+
 import interpreter.Environment;
 import interpreter.Interpreter;
 import interpreter.InterpreterException;
@@ -19,11 +21,16 @@ import interpreter.expr.BinaryExpr;
 import interpreter.expr.ConstExpr;
 import interpreter.expr.Expr;
 import interpreter.expr.FunctionCallExpr;
+import interpreter.expr.ListExpr;
+import interpreter.expr.ObjectExpr;
+import interpreter.expr.ObjectItem;
 import interpreter.expr.SetExpr;
 import interpreter.expr.UnaryExpr;
 import interpreter.expr.Variable;
 import interpreter.function.StandardFunction;
 import interpreter.value.BoolValue;
+import interpreter.value.FunctionValue;
+import interpreter.value.TextValue;
 import interpreter.value.Value;
 import lexical.LexicalAnalysis;
 import lexical.Token;
@@ -137,7 +144,6 @@ public class SyntaticAnalysis {
     }
 
     // <cmd> ::= <block> | <decl> | <debug> | <if> | <while> | <for> | <assign>
-    // <cmd> ::= <block> | <decl> | <debug> | <if> | <while> | <for> | <assign>
     private Command procCmd() {
         Command cmd = null;
         if (check(OPEN_CUR)) {
@@ -161,39 +167,39 @@ public class SyntaticAnalysis {
 
  
 
-        // <decl> ::= ( const | let ) <name> [ '=' <expr> ] { ',' <name> [ '=' <expr> ] } ';'
-        private BlocksCommand procDecl() {
-            boolean constant = false;
-            if (match(CONST, LET)) {
-                constant = (previous.type == CONST);
-            } else {
-                reportError();
-            }
-            int line = previous.line;
-    
-            Token name = procName();
-            Variable var = this.environment.declare(name, constant);
-    
-            Expr expr = match(ASSIGN) ? procExpr() : new ConstExpr(name.line, null);
-            InitializeCommand icmd = new InitializeCommand(name.line, var, expr);
-    
-            List<Command> cmds = new ArrayList<Command>();
-            cmds.add(icmd);
-    
-            while (match(COMMA)) {
-                name = procName();
-                var = this.environment.declare(name, constant);
-    
-                expr = match(ASSIGN) ? procExpr() : new ConstExpr(name.line, null);
-                icmd = new InitializeCommand(name.line, var, expr);
-                cmds.add(icmd);
-            }
-    
-            eat(SEMICOLON);
-    
-            BlocksCommand bcmds = new BlocksCommand(line, cmds);
-            return bcmds;
+    // <decl> ::= ( const | let ) <name> [ '=' <expr> ] { ',' <name> [ '=' <expr> ] } ';'
+    private BlocksCommand procDecl() {
+        boolean constant = false;
+        if (match(CONST, LET)) {
+            constant = (previous.type == CONST);
+        } else {
+            reportError();
         }
+        int line = previous.line;
+
+        Token name = procName();
+        Variable var = this.environment.declare(name, constant);
+
+        Expr expr = match(ASSIGN) ? procExpr() : new ConstExpr(name.line, null);
+        InitializeCommand icmd = new InitializeCommand(name.line, var, expr);
+
+        List<Command> cmds = new ArrayList<Command>();
+        cmds.add(icmd);
+
+        while (match(COMMA)) {
+            name = procName();
+            var = this.environment.declare(name, constant);
+
+            expr = match(ASSIGN) ? procExpr() : new ConstExpr(name.line, null);
+            icmd = new InitializeCommand(name.line, var, expr);
+            cmds.add(icmd);
+        }
+
+        eat(SEMICOLON);
+
+        BlocksCommand bcmds = new BlocksCommand(line, cmds);
+        return bcmds;
+    }
 
     // <debug> ::= debug <expr> ';'
     private DebugCommand procDebug() {
@@ -435,7 +441,6 @@ public class SyntaticAnalysis {
             UnaryExpr uexpr = new UnaryExpr(previous.line, expr, op);
             expr = uexpr;
         }
-
         return expr;
     }
 
@@ -447,7 +452,8 @@ public class SyntaticAnalysis {
         if (match(OPEN_PAR)) {
             expr = procExpr();
             eat(CLOSE_PAR);
-        } else {
+        } 
+        else {
             expr = procRValue();
         }
 
@@ -484,11 +490,14 @@ public class SyntaticAnalysis {
             Value<?> v = procConst();
             expr = new ConstExpr(previous.line, v);
         } else if (check(OPEN_BRA)) {
-            procList();
+            expr = procList();
         } else if (check(OPEN_CUR)) {
-            procObject();
+            expr = procObject();
         } else if (check(FUNCTION)) {
-            procFunction();
+            int line = current.line;
+            StandardFunction sf = procFunction();
+            FunctionValue fv = new FunctionValue(sf);
+            expr = new ConstExpr(line, fv);
         } else {
             expr = procLValue();
         }
@@ -525,41 +534,65 @@ public class SyntaticAnalysis {
     }
 
     // <list> ::= '[' [ <expr> { ',' <expr> } ] ']'
-    private void procList() {
+    private Expr procList() {
         eat(OPEN_BRA);
+
+        List<Expr> exprList = new ArrayList<Expr>();
+        Expr expr;
+        int line = previous.line;
 
         if (check(NOT, ADD, SUB, INC, DEC, OPEN_PAR,
                   UNDEFINED, FALSE, TRUE, NUMBER, TEXT, OPEN_BRA,
                   OPEN_CUR, FUNCTION, NAME)) {
-            procExpr();
 
+            expr = procExpr();
+            exprList.add(expr);
+            
             while (match(COMMA)) {
-                procExpr();
+               expr =  procExpr();
+               exprList.add(expr);
             }
         }
         eat(CLOSE_BRA);
+        return expr = new ListExpr(line, exprList);
     }
-
 
     // <object> ::= '{' [ <name> ':' <expr> { ',' <name> ':' <expr> } ] '}'
-    private void procObject() {
+    private Expr procObject() {
         eat(OPEN_CUR);
 
-        if (check(NAME)) {
-            procName();
+        Expr expr = null;
+        List<ObjectItem> objList = new ArrayList<ObjectItem>();
+        int line = previous.line;
+
+
+        if (check(NAME, TEXT)) {
+            Value<?> valueText = procText();
+            ObjectItem objItem = new ObjectItem();
+            
+            
             eat(COLON);
-            procExpr();
+
+            objItem.key = TextValue.convert(valueText);
+            objItem.value =  procExpr();
+            objList.add(objItem);
 
             while (match(COMMA)) {
-                procName();
+                objItem = new ObjectItem(); // Instancio um novo
+                valueText = procText();
+                objItem.key = TextValue.convert(valueText);
                 eat(COLON);
-                procExpr();
+                objItem.value = procExpr();  
+                objList.add(objItem);
             }
+            eat(CLOSE_CUR);
+            ObjectExpr objectExpr = new ObjectExpr(line, objList);
+            return  objectExpr;
         }
         eat(CLOSE_CUR);
+        return  expr;
     }
 
-    
     // <function> ::= function '(' ')' '{' <code> [ return <expr> ';' ] '}'
     private StandardFunction procFunction() {
         eat(FUNCTION);
@@ -606,7 +639,6 @@ public class SyntaticAnalysis {
                 eat(CLOSE_BRA);
             }
         }
-
         return var;
     }
 

@@ -160,6 +160,12 @@ public class BinaryExpr extends Expr{
     }
 
     private Value<?> addOp(Value<?> v1, Value<?> v2) {
+        if(v1 instanceof TextValue || v2 instanceof TextValue){
+            String str1 = TextValue.convert(v1);
+            String str2 = TextValue.convert(v2);
+            return new TextValue(str1 + str2);
+        }
+
         double d1 = NumberValue.convert(v1);
         double d2 = NumberValue.convert(v2);
         return new NumberValue(d1 + d2);

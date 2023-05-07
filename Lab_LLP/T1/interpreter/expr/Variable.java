@@ -44,5 +44,4 @@ public class Variable extends SetExpr {
 
         this.value = value;
     }
-
 }
