@@ -12,6 +12,7 @@ import interpreter.command.AssignCommand;
 import interpreter.command.BlocksCommand;
 import interpreter.command.Command;
 import interpreter.command.DebugCommand;
+import interpreter.command.ForCommand;
 import interpreter.command.IfCommand;
 import interpreter.command.InitializeCommand;
 import interpreter.command.WhileCommand;
@@ -29,6 +30,7 @@ import interpreter.expr.Variable;
 import interpreter.function.StandardFunction;
 import interpreter.value.BoolValue;
 import interpreter.value.FunctionValue;
+import interpreter.value.NumberValue;
 import interpreter.value.TextValue;
 import interpreter.value.Value;
 import lexical.LexicalAnalysis;
@@ -244,18 +246,41 @@ public class SyntaticAnalysis {
 
 
     // <for> ::= for '(' [ let ] <name> in <expr> ')' <cmd>
-    private void procFor() {
+    private ForCommand procFor() {
+
+        boolean constant = false;
         eat(FOR);
         eat(OPEN_PAR);
+
         if (match(LET)) {
-            // fazer nada
+            
+            constant = (previous.type == CONST); 
+            Token name = procName();
+            Variable var = this.environment.declare(name, constant);
+            int line = previous.line;
+            eat(IN);
+            Expr expr = procExpr();
+            eat(CLOSE_PAR);
+            Command cmds = procCmd();
+            NumberValue temp = new NumberValue((double) 0);
+            var.setValue(temp);
+            ForCommand forc = new ForCommand(line, expr, cmds, var);
+            return forc;
         }
-        procName();
+
+        Token name = procName();
+        Variable var = this.environment.get(name);
+        int line = previous.line;
+
         eat(IN);
-        procExpr();
+        Expr expr = procExpr();
         eat(CLOSE_PAR);
-        procCmd();
+
+        Command cmds = procCmd();
+        ForCommand forc = new ForCommand(line, expr, cmds, var);
+        return forc;
     }
+    
 
     // <assign> ::= [ <expr> '=' ] <expr> ';'
     private AssignCommand procAssign() {

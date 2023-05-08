@@ -17,10 +17,12 @@ public class WhileCommand extends Command {
 
     @Override
     public void execute() {
+
         while (true) {
-            Value<?> v = expr.expr();
-            boolean b = BoolValue.convert(v);
-            if (!b)
+            Value<?> value = expr.expr();
+            boolean boolVar = BoolValue.convert(value);
+            
+            if (!boolVar)
                 break;
 
             cmds.execute();

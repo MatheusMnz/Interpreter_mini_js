@@ -27,23 +27,26 @@ public class UnaryExpr extends Expr {
     }
 
     public Value<?> expr() {
-        Value<?> v = this.expr.expr();
-        switch (this.op) {
+
+        
+        Value<?> value = this.expr.expr();
+        switch (this.op)
+        {
             case Not:
-                return notOp(v);
+                return notOp(value);
             case Pos:
-                return posOp(v);
+                return posOp(value);
             case Neg:
-                return negOp(v);
+                return negOp(value);
             case PreInc:
-                return preIncOp(v);
+                return preIncOp(value);
             case PosInc:
-                return posIncOp(v);
+                return posIncOp(value);
             case PreDec:
-                return preDecOp(v);
+                return preDecOp(value);
             case PosDec:
             default:
-                return posDecOp(v);
+                return posDecOp(value);
         }
     }
 
@@ -62,18 +65,22 @@ public class UnaryExpr extends Expr {
         return new NumberValue(-n);
     }
 
-    private Value<?> preIncOp(Value<?> v){
+    private Value<?> preIncOp(Value<?> value){
         
-       v = expr.expr();
-       double d = NumberValue.convert(v);
+       value = expr.expr();
+       
+       double d = NumberValue.convert(value);
        double d1 = d + 1;
+
        Value<?> v2 = new NumberValue(d1);
 
-       if(expr instanceof SetExpr){
+       if(expr instanceof SetExpr)
+       {
         SetExpr se = (SetExpr) expr;
         se.setValue(v2);
         return v2;
        } 
+
        throw new InterpreterException(super.getLine());
     }
 

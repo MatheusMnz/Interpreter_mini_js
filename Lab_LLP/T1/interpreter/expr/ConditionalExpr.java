@@ -16,17 +16,18 @@ public class ConditionalExpr extends Expr{
         this.falseExpr = falseExpr;
     }
 
+    
     @Override
     public Value<?> expr() {
-        Value<?> v1 = cond.expr();
-        boolean b1 =  BoolValue.convert(v1);
+        Value<?> value = cond.expr();
+        boolean boolValue =  BoolValue.convert(value);
 
-        if (b1) {
-            Value<?> v2 = trueExpr.expr();
-            return v2;       
+        if (boolValue) {
+            Value<?> value_aux = trueExpr.expr();
+            return value_aux;       
         } else {
-            Value<?> v3 = falseExpr.expr();
-            return v3;
+            Value<?> value_aux2 = falseExpr.expr();
+            return value_aux2;
         }
     }
 }

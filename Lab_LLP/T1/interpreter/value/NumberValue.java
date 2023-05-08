@@ -41,20 +41,22 @@ public class NumberValue extends Value<Double> {
             Long.toString(tmp) : this.value.toString();
     }
 
-    public static double convert(Value<?> v) {
-        if (v instanceof BoolValue) {
-            return ((BoolValue) v).value() ? 1.0 : 0.0;
-        } else if (v instanceof NumberValue) {
-            return ((NumberValue) v).value();
-        } else if (v instanceof TextValue) {
+    public static double convert(Value<?> value) {
+
+        if (value instanceof BoolValue) 
+            return ((BoolValue) value).value() ? 1.0 : 0.0;
+        else if (value instanceof NumberValue)
+            return ((NumberValue) value).value();
+        else if (value instanceof TextValue){
+
             try {
-                return Double.parseDouble(((TextValue) v).value());
+                return Double.parseDouble(((TextValue) value).value());
             } catch (Exception e) {
                 return 0.0;
             }
-        } else {
-            return 0.0;
+            
         }
+        else 
+            return 0.0;
     }
-
 }

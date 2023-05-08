@@ -22,16 +22,20 @@ public class FunctionCallExpr extends Expr {
     
     @Override
     public Value<?> expr() {
-        Value<?> v = expr.expr();
-        if (v instanceof FunctionValue) {
-            FunctionValue fv = (FunctionValue) v;
-            Function f = fv.value();
 
-            List<Value<?>> a = new ArrayList<Value<?>>();
-            for (Expr e : args)
-                a.add(e.expr());
+        Value<?> value  = expr.expr();
 
-            ListValue lv = new ListValue(a);
+        if (value instanceof FunctionValue){
+
+            FunctionValue functionValue = (FunctionValue) value;
+            Function f = functionValue.value();
+
+            List<Value<?>> listValue = new ArrayList<Value<?>>();
+            
+            for (Expr iter: args)
+                listValue.add(iter.expr());
+
+            ListValue lv = new ListValue(listValue);
             Variable params = f.getParams();
             params.setValue(lv);
             

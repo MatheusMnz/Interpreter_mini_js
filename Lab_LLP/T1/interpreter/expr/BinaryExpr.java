@@ -100,6 +100,8 @@ public class BinaryExpr extends Expr{
     }
 
     private Value<?> equalOp(Value<?> v1, Value<?> v2) {
+
+        // Validando as instancias e retornando os respectivos valores
         if (v1 instanceof NumberValue && v2 instanceof NumberValue) {
             return new BoolValue(v1.equals(v2));
         } else if (v1 instanceof TextValue && v2 instanceof TextValue) {
@@ -117,6 +119,7 @@ public class BinaryExpr extends Expr{
         }
     }
 
+        // Validando as instancias e retornando os respectivos valores
     private Value<?> notEqualOp(Value<?> v1, Value<?> v2) {
         if (v1 instanceof NumberValue && v2 instanceof NumberValue) {
             return new BoolValue(!(v1.equals(v2)));

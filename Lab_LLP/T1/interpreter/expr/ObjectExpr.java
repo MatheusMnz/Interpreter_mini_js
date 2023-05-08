@@ -18,9 +18,13 @@ public class ObjectExpr extends Expr{
 
     @Override
     public Value<?> expr() {
+
+        // Criando o hashMap do meu Objeto
         HashMap<TextValue, Value<?>> hashMap = new HashMap<TextValue, Value<?>>();
 
-        for(ObjectItem objectItem : items){
+        for(ObjectItem objectItem : items)
+        {
+            // Para cada iteração eu crio um new TextValue que é a key e adiciono o valor
             TextValue textValue = new TextValue(objectItem.key);
             hashMap.put(textValue, objectItem.value.expr());
         }

@@ -8,24 +8,24 @@ import interpreter.value.Value;
 
 public class ListExpr extends Expr{
     
-    //private List<Value<?>> items;
     private List<Expr> items;
     
-
     public ListExpr(int line, List<Expr> items) {
         super(line);
         this.items = items;
     }
 
+
     @Override
-    public Value<?> expr() {
-        List<Value<?>> listV = new ArrayList<Value<?>>();
+    public Value<?> expr()
+    {
+        List<Value<?>> listValueAux = new ArrayList<Value<?>>();
 
         for(Expr e : items) {
-            listV.add(e.expr());
+            listValueAux.add(e.expr());
         }
 
-        ListValue listValue = new ListValue(listV);
+        ListValue listValue = new ListValue(listValueAux);
         return listValue; 
     }
 }

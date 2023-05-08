@@ -19,9 +19,13 @@ public class IfCommand extends Command {
 
     @Override
     public void execute() {
-        Value<?> v = expr.expr();
-        boolean b = BoolValue.convert(v);
-        if (b) {
+
+        // Capturo o valor com o expr
+        Value<?> value = expr.expr();
+
+        // Realizo a conversão e valido
+        boolean boolVar = BoolValue.convert(value);
+        if (boolVar) {
             thenCmds.execute();
         } else {
             elseCmds.execute();

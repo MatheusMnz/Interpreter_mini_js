@@ -40,21 +40,20 @@ public class BoolValue extends Value<Boolean> {
         return this.value.toString();
     }
 
-    public static boolean convert(Value<?> v) {
-        if (v instanceof BoolValue) {
-            return ((BoolValue) v).value();
-        } else if (v instanceof NumberValue) {
-            return ((NumberValue) v).value() != 0.0;
-        } else if (v instanceof TextValue) {
-            return !((TextValue) v).value().isEmpty();
-        } else if (v instanceof ListValue) {
-            return !((ListValue) v).value().isEmpty();
-        } else if (v instanceof ObjectValue) {
-            return !((ObjectValue) v).value().isEmpty();
-        } else if (v instanceof FunctionValue) {
+    public static boolean convert(Value<?> value) {
+        if (value instanceof BoolValue) 
+            return ((BoolValue) value).value();
+        else if (value instanceof NumberValue) 
+            return ((NumberValue) value).value() != 0.0;
+        else if (value instanceof TextValue)
+            return !((TextValue) value).value().isEmpty();
+        else if (value instanceof ListValue)
+            return !((ListValue) value).value().isEmpty();
+        else if (value instanceof ObjectValue)
+            return !((ObjectValue) value).value().isEmpty();
+        else if (value instanceof FunctionValue)
             return true;
-        } else {
+        else
             return false;
-        }
     }
 }
