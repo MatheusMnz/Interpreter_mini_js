@@ -19,12 +19,11 @@ public class NativeFunction extends Function{
     public NativeFunction (Variable params, Op op) {
 
         super(params);
-        this.op = op; //Pode estar errado, verificar depois
+        this.op = op; 
     }
 
     @Override
-    public Value<?> call() { //TA ERRADO 
-
+    public Value<?> call() {
         switch (op) {
             case Log:
                 return callLog();
@@ -33,7 +32,6 @@ public class NativeFunction extends Function{
             case Random:
             default: 
                return callRandom();
-            
         }
     }
 

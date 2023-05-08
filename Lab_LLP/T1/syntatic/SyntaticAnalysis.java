@@ -5,8 +5,6 @@ import static lexical.Token.Type.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.w3c.dom.Text;
-
 import interpreter.Environment;
 import interpreter.Interpreter;
 import interpreter.InterpreterException;
@@ -59,7 +57,7 @@ public class SyntaticAnalysis {
     }
 
     private void advance() {
-        System.out.println("Found " + current);
+        //System.out.println("Found " + current);
         previous = current;
         current = lex.nextToken();
     }
@@ -68,7 +66,7 @@ public class SyntaticAnalysis {
         if (type == current.type) {
             advance();
         } else {
-            System.out.println("Expected (..., " + type + ", ..., ...), found " + current);
+            //System.out.println("Expected (..., " + type + ", ..., ...), found " + current);
             reportError();
         }
     }
@@ -318,7 +316,6 @@ public class SyntaticAnalysis {
 
             left = new BinaryExpr(line, left, op, right);
         }
-
         return left;
     }
 
@@ -539,6 +536,7 @@ public class SyntaticAnalysis {
         eat(OPEN_BRA);
 
         List<Expr> exprList = new ArrayList<Expr>();
+
         Expr expr;
         int line = previous.line;
 
@@ -646,9 +644,7 @@ public class SyntaticAnalysis {
                 Expr expr = procExpr();
                 eat(CLOSE_BRA);
                 AccessExpr acces = new AccessExpr(line,var,expr);
-                Variable variable = new Variable(name);
-                variable.setValue(acces.expr());
-                return variable;
+                return acces;
             }
         }
         return var;
