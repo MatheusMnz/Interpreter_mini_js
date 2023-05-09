@@ -69,7 +69,6 @@ public class NativeFunction extends Function{
             InputStreamReader input = new InputStreamReader(System.in);
             BufferedReader reader = new BufferedReader(input);
 
-            System.out.print("> ");
             String line = reader.readLine();
 
             return new TextValue(line);
