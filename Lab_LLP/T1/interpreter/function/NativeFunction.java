@@ -17,9 +17,7 @@ public class NativeFunction extends Function{
         Log,
         Read,
         Random
-    }
-
-    private Op op;
+    } private Op op;
 
 
     public NativeFunction (Variable params, Op op) {

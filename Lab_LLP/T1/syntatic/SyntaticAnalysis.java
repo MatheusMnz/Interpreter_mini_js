@@ -158,7 +158,7 @@ public class SyntaticAnalysis {
         } else if (check(WHILE)) {
             cmd = procWhile();
         } else if (check(FOR)) {
-            procFor();
+            cmd = procFor();
         } else {
             cmd = procAssign();
         }

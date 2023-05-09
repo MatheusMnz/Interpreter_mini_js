@@ -35,20 +35,12 @@ public class ForCommand extends Command {
             ListValue lv = (ListValue) value;
             List<Value<?>> listValue = lv.value();
 
-            // Para cada elemento eu itero no for
-            for(int i = index; i<(int) NumberValue.convert(listValue.get(listValue.size()-1)); i++)
-            {
-                for (int j = 0; j < listValue.size(); j++)
-                {
-                    if (index == (int) NumberValue.convert(listValue.get(j))) 
-                    {
-                        cmds.execute();
-                        var.setValue(new NumberValue((double) index));
-                    }
-                }
-                index++;       
+            //Itero cada posição
+            for(int i = index; i < listValue.size(); i++){
+                index = (int) NumberValue.convert(listValue.get(i));
+                var.setValue(new NumberValue((double) index));
+                cmds.execute();
             }
-            cmds.execute();
         } 
         else 
             throw new InterpreterException(super.getLine());

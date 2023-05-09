@@ -29,7 +29,7 @@ public class Interpreter {
         
         //Gerando Mapas para tratar as NativesFunction do JS
         Map<TextValue, Value<?>> hash_map = new HashMap<TextValue, Value<?>>();
-        hash_map.put(new TextValue("log"), new FunctionValue(new NativeFunction(params, NativeFunction.Op.Log)));
+        hash_map.put(new TextValue("log")    , new FunctionValue(new NativeFunction(params, NativeFunction.Op.Log)));
         hash_map.put(new TextValue("read")   , new FunctionValue(new NativeFunction(params, NativeFunction.Op.Read)));
         hash_map.put(new TextValue("random") , new FunctionValue(new NativeFunction(params, NativeFunction.Op.Random)));
 
